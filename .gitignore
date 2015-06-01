@@ -6,6 +6,7 @@
 *.suo
 *.vcxproj
 *.vc120pdb
+*.deps
 build/
 bin/
 64x/
