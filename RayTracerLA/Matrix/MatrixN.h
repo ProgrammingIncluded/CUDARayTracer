@@ -28,7 +28,7 @@ namespace mat
 			bool setValue(float values[], uint matrixSize);
 
 			/**
-			* Adds the give matrix to this matrix.
+			* Adds the give matrix to this matrix. Assumes values have been allocated.
 			*/
 			void add(MatrixN* matrix);
 
@@ -41,7 +41,8 @@ namespace mat
 			/**
 			* Mutliplies one matrix by another.
 			*/
-			void mult(MatrixN* matrix);
+			// For when you have a memory location to spare.
+			void mult(MatrixN* matrix, MatrixN* result);
 
 			/**
 			* Makes all values the opposite in the matrix.
@@ -56,16 +57,38 @@ namespace mat
 
 			//MatrixN copy();
 
-			// Use RREF
+			// Use RREF w/ Augumented Matrix. Thank you Prof. Van Lingen!
 			// float det();
 
 			/*Operator Overloads*/
 			friend std::ostream& operator<<(std::ostream& os, const MatrixN& matN);
 
+			/**
+			* Copies the value from GPU to CPU memory.
+			*/
+			void copyGPUValue();
+
+			/**
+			* Call this function when you want to allocate memory into the GPU.
+			* Mainly used internally. Returns false if space already allocated.
+			* Short answer to our slowness problem. Nothing too complicated like a
+			* memory manager.
+			*/
+			bool allocateGPUMemory();
+
+			/**
+			* For whatever reason, perhaps a melt down, use this to delete allocation
+			* in GPU. Returns false if internal ptr is null. 
+			*/
+			bool deallocateGPUMemory();
+
 		protected:
 			// Pointer to 1D array storing all the matrix data.
 			// Converted to 2D within functions.
 			float* value;
+			// Pointer to allocation in GPU. Null by default.
+			float* d_value;
+
 			//MatrixN createSubMatrix(uint size);
 
 		private:

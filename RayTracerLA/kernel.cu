@@ -7,9 +7,10 @@
 
 int main()
 {
-	float test[9] = { 8.0f, 3.0f, 44.0f,
-		45.0f, 96.0f, 51.0f,
-		22.0f, 55.0f, 5.0f };
+	float test[9] = 
+	{   1.0f, 1.0f, 1.0f,
+		1.0f, 2.0f, 1.0f,
+		1.0f, 1.0f, 1.0f};
 
 
 	// GLM TEST
@@ -21,24 +22,32 @@ int main()
 	std::cout << float(clock() - tst_time) << std::endl;
 
 	// CUDA Matrix Test
-	const clock_t begin_time = clock();
 	mat::MatrixN* matN = new mat::MatrixN(3);
 	matN->setValue(test, 3);
+	matN->allocateGPUMemory();
 
 	mat::MatrixN* matB = new mat::MatrixN(3);
-	matB->setValue(test, 3);
+	matB->setValue(test,3);
+	matB->allocateGPUMemory();
 
-	//std::cout << "Before:" << std::endl;
-	//std::cout << *matN;
-	
+	mat::MatrixN* matR = new mat::MatrixN(3);
+	matR->setValue(test, 3);
+	matR->allocateGPUMemory();
 
-
-	// do something
-	matN->mult(matB);
-	std::cout << float(clock() - begin_time) << std::endl;
-
-	std::cout << "After:" << std::endl;
+	std::cout << "Before:" << std::endl;
 	std::cout << *matN;
+	const clock_t begin_time = clock();
+	matN->mult(matB, matR);
+	std::cout << float(clock() - begin_time) << std::endl;
+	
+	matR->copyGPUValue();
+	std::cout << "After:" << std::endl;
+	std::cout << *matR;
+
+	// Delete testing.
+	delete matN;
+	delete matB;
+	delete matR;
 
 	std::cin.ignore();
 }
