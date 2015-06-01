@@ -1,6 +1,12 @@
 *.dll
 *.exe
 *.opensdf
+*.sdf
+*.sln
+*.suo
+*.filters
+*.vcxproj
+*.vc120pdb
 build/
 bin/
 64x/
