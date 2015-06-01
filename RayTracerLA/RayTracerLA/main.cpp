@@ -7,10 +7,10 @@
 
 int main()
 {
-	float test[9] = 
-	{   1.0f, 1.0f, 1.0f,
-		1.0f, 2.0f, 1.0f,
-		1.0f, 1.0f, 1.0f};
+	float test[9] =
+	{ 1.0f, 1.0f, 1.0f,
+	1.0f, 2.0f, 1.0f,
+	1.0f, 1.0f, 1.0f };
 
 
 	// GLM TEST
@@ -27,7 +27,7 @@ int main()
 	matN->allocateGPUMemory();
 
 	mat::MatrixN* matB = new mat::MatrixN(3);
-	matB->setValue(test,3);
+	matB->setValue(test, 3);
 	matB->allocateGPUMemory();
 
 	mat::MatrixN* matR = new mat::MatrixN(3);
@@ -39,7 +39,7 @@ int main()
 	const clock_t begin_time = clock();
 	matN->mult(matB, matR);
 	std::cout << float(clock() - begin_time) << std::endl;
-	
+
 	matR->copyGPUValue();
 	std::cout << "After:" << std::endl;
 	std::cout << *matR;

@@ -18,18 +18,13 @@
     <ClCompile Include="..\maintest.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\Matrix\Matrix3.cpp">
-      <Filter>header\Matrix</Filter>
-    </ClCompile>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\GeneralTypedef.h">
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="..\Matrix\MatrixN.h">
-      <Filter>header\Matrix</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Matrix\Matrix3.h">
       <Filter>header\Matrix</Filter>
     </ClInclude>
   </ItemGroup>
