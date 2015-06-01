@@ -4,7 +4,6 @@
 *.sdf
 *.sln
 *.suo
-*.filters
 *.vcxproj
 *.vc120pdb
 build/
