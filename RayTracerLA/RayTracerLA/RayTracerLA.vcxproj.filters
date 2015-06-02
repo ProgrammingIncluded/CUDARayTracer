@@ -15,22 +15,35 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\maintest.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Camera.cpp">
+      <Filter>src\Matrix</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\GeneralTypedef.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Matrix\MatrixN.h">
+    <ClInclude Include="Camera.h">
       <Filter>header\Matrix</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="OpenGLTest.cuh">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix\MatrixN.h">
+      <Filter>header\Matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneralTypedef.h">
+      <Filter>header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\Matrix\MatrixN.cu">
+    <CudaCompile Include="OpenGLTest.cu">
+      <Filter>src</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Matrix\MatrixN.cu">
       <Filter>src\Matrix</Filter>
     </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RayTracerLA.rc" />
   </ItemGroup>
 </Project>

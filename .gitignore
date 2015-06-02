@@ -7,6 +7,7 @@
 *.vcxproj
 *.vc120pdb
 *.deps
+*.rc
 build/
 bin/
 64x/
