@@ -20,24 +20,27 @@ uchar4* d_textureBufferData;
 sf::Vector2u windowSize;
 
 void drawFrame();
-void createFrame();
+void createFrame(float time);
 void setupOpenGL();
 
 
 int main()
 {
 	// create the window
-	sf::RenderWindow window(sf::VideoMode(800, 800), "OpenGL", sf::Style::Default, sf::ContextSettings(32));
-	window.setVerticalSyncEnabled(true);
+	sf::RenderWindow window(sf::VideoMode(256,256), "OpenGL");
+	//window.setVerticalSyncEnabled(true);
 
 	windowSize = sf::Vector2u(window.getSize());
 
 	bool running = true;
 	glewInit();
 	std::printf("OpenGL: %s:", glGetString(GL_VERSION));
-	setupOpenGL();
 	// We will not be using SFML's gl states.
 	window.resetGLStates();
+	setupOpenGL();
+
+	sf::Time time;
+
 	while (running)
 	{
 		// handle events
@@ -55,11 +58,12 @@ int main()
 				glViewport(0, 0, event.size.width, event.size.height);
 				windowSize = window.getSize();
 			}
+
 		}
 
 		// clear the buffers
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		createFrame();
+		createFrame(time.asSeconds());
 		drawFrame();
 		window.display();
 	}

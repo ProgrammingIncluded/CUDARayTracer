@@ -8,6 +8,7 @@
 *.vc120pdb
 *.deps
 *.rc
+*.TMP
 build/
 bin/
 64x/
