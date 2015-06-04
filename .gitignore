@@ -9,6 +9,7 @@
 *.deps
 *.rc
 *.TMP
+*.pdb
 build/
 bin/
 64x/

@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="header">
+      <UniqueIdentifier>{c2d5e6fc-9afb-482b-bfa6-15db157bfd6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{1e47c625-23e0-4a21-bd48-46604f434e62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header\Mat">
+      <UniqueIdentifier>{6de17225-4363-436f-8095-9b49148c726d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Mat">
+      <UniqueIdentifier>{9a21dbd0-8470-4b11-b4c0-6bab7cde00f9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="RayTracerLA\Camera.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTracerLA\GeneralTypedef.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTracerLA\OpenGLTest.cuh">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTracerLA\Matrix\MatrixN.h">
+      <Filter>header\Mat</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTracerLA\resource.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTracerLA\cutil.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTracerLA\cutil_inline_runtime.h">
+      <Filter>header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="RayTracerLA\Camera.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="RayTracerLA\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="RayTracerLA\OpenGLTest.cu">
+      <Filter>src</Filter>
+    </CudaCompile>
+    <CudaCompile Include="RayTracerLA\Matrix\MatrixN.cu">
+      <Filter>src\Mat</Filter>
+    </CudaCompile>
+  </ItemGroup>
+</Project>

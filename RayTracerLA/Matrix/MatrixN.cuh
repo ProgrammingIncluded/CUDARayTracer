@@ -8,7 +8,9 @@
 #include <iostream>
 #include <vector>
 
-#include "../GeneralTypedef.h"
+#include "CUDAMR.cuh"
+#include "CMROperations.cuh"
+#include "GeneralTypedef.h"
 
 namespace mat
 {
@@ -18,13 +20,11 @@ namespace mat
 	*
 	* TODO: Add better function usage with mem allocation in specific function?
 	*/
-	class MatrixN
+	class MatrixN : public CUDAMR<float>
 	{
 		public:
 			MatrixN(uint size);
 			~MatrixN();
-
-			bool setValue(float values[], uint matrixSize);
 
 			/**
 			* Adds the give matrix to this matrix. Assumes values have been allocated.
@@ -62,36 +62,7 @@ namespace mat
 			/*Operator Overloads*/
 			friend std::ostream& operator<<(std::ostream& os, const MatrixN& matN);
 
-			/**
-			* Copies the value from GPU to CPU memory.
-			*/
-			void copyGPUValue();
-
-			/**
-			* Call this function when you want to allocate memory into the GPU.
-			* Mainly used internally. Returns false if space already allocated.
-			* Short answer to our slowness problem. Nothing too complicated like a
-			* memory manager.
-			*/
-			bool allocateGPUMemory();
-
-			/**
-			* For whatever reason, perhaps a melt down, use this to delete allocation
-			* in GPU. Returns false if internal ptr is null. 
-			*/
-			bool deallocateGPUMemory();
-
-		protected:
-			// Pointer to 1D array storing all the matrix data.
-			// Converted to 2D within functions.
-			float* value;
-			// Pointer to allocation in GPU. Null by default.
-			float* d_value;
-
 			//MatrixN createSubMatrix(uint size);
-
-		private:
-			uint size;
 	};
 }
 #endif
