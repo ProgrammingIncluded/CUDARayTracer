@@ -3,13 +3,12 @@
 
 #include <cuda.h>
 #include "cuda_runtime.h"
-#include "device_launch_parameters.h"
 #include "vector_types.h"
 
 #include <iostream>
 #include <vector>
 
-#include "GeneralTypedef.h"
+#include "../GeneralTypedef.h"
 
 namespace mat
 {

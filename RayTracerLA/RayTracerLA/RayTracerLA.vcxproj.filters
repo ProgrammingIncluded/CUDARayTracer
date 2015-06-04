@@ -34,6 +34,12 @@
     <ClInclude Include="GeneralTypedef.h">
       <Filter>header</Filter>
     </ClInclude>
+    <ClInclude Include="cutil_inline_runtime.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="cutil.h">
+      <Filter>header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="OpenGLTest.cu">
