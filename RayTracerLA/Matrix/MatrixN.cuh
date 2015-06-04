@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "CUDAMR.cuh"
-#include "CMROperations.cuh"
 #include "GeneralTypedef.h"
 
 namespace mat
@@ -23,7 +22,7 @@ namespace mat
 	class MatrixN : public CUDAMR<float>
 	{
 		public:
-			MatrixN(uint size);
+			MatrixN(uint dim);
 			~MatrixN();
 
 			/**

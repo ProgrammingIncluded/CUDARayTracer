@@ -16,31 +16,16 @@ namespace mat
 	template <typename T>
 	class CUDAMR
 	{
-		protected:
-			CUDAMR(uint x, uint y)
-			{
-				size = sf::Vector2u(x,y);
-				byteSize = size.x * size.y *sizeof(T);
-				value = (T*) malloc(byteSize);
-			}
+		public:
 
-			~CUDAMR()
-			{
-				if (value != nullptr)
-					free(value);
-				value = nullptr;
-			}
-			
 			bool setValue(float values[], uint size)
 			{
 				if (size != this->size.x*this->size.y)
 					return false;
 
-				sd::memcpy(this->value, values, sizeof(T)*size);
+				std::memcpy(this->value, values, sizeof(T)*size);
 				return true;
 			}
-
-
 
 			/**
 			* Copies the value from GPU to CPU memory.
@@ -49,8 +34,7 @@ namespace mat
 			{
 				cudaDeviceSynchronize();
 				// You have to copy the result or use friends.
-				cudaMemcpy(this->value, this->d_value, sizeof(float) * this->size * this->size,
-					cudaMemcpyDeviceToHost);
+				cudaMemcpy(this->value, this->d_value, byteSize,cudaMemcpyDeviceToHost);
 			};
 
 			/**
@@ -64,8 +48,6 @@ namespace mat
 				if (d_value != nullptr)
 					return false;
 
-				// Size is given in constructor, will not change dynamically.
-				size_t byteSize = sizeof(float) * this->size * this->size;
 				// Allocate!
 				cudaMalloc(&d_value, byteSize);
 				// Give it the info. Careful of interdeterminant values.
@@ -85,6 +67,30 @@ namespace mat
 				cudaFree(d_value);
 				return true;
 			};
+		protected:
+			CUDAMR(uint x, uint y)
+			{
+				if (x < 0)
+					x = -x;
+				if (y < 0)
+					y = -y;
+
+				value = nullptr;
+				d_value = nullptr;
+
+				size = sf::Vector2u(x,y);
+				byteSize = size.x * size.y *sizeof(T);
+				value = (T*) malloc(byteSize);
+			}
+
+			virtual ~CUDAMR()
+			{
+				if (value != NULL)
+					free(value);
+				value = NULL;
+				deallocateGPUMemory();
+			}
+
 
 			// Pointer to 1D array storing all the matrix data.
 			// Converted to 2D within functions.

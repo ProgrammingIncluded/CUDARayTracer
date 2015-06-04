@@ -15,42 +15,57 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="RayTracerLA\Camera.h">
+    <ClInclude Include="resource.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="RayTracerLA\GeneralTypedef.h">
+    <ClInclude Include="Camera.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="RayTracerLA\OpenGLTest.cuh">
+    <ClInclude Include="cutil.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="RayTracerLA\Matrix\MatrixN.h">
+    <ClInclude Include="cutil_inline_runtime.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneralTypedef.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLTest.cuh">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix\MatrixN.cuh">
       <Filter>header\Mat</Filter>
     </ClInclude>
-    <ClInclude Include="RayTracerLA\resource.h">
-      <Filter>header</Filter>
+    <ClInclude Include="Matrix\CUDAMR.cuh">
+      <Filter>header\Mat</Filter>
     </ClInclude>
-    <ClInclude Include="RayTracerLA\cutil.h">
-      <Filter>header</Filter>
+    <ClInclude Include="Matrix\VectN.cuh">
+      <Filter>header\Mat</Filter>
     </ClInclude>
-    <ClInclude Include="RayTracerLA\cutil_inline_runtime.h">
+    <ClInclude Include="CUDADef.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="RayTracerLA\Camera.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="RayTracerLA\main.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="RayTracerLA\OpenGLTest.cu">
+    <CudaCompile Include="OpenGLTest.cu">
       <Filter>src</Filter>
     </CudaCompile>
-    <CudaCompile Include="RayTracerLA\Matrix\MatrixN.cu">
+    <CudaCompile Include="Matrix\MatrixN.cu">
       <Filter>src\Mat</Filter>
     </CudaCompile>
+    <CudaCompile Include="Matrix\VectN.cu">
+      <Filter>src\Mat</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Matrix\CUDAMR.cu">
+      <Filter>src\Mat</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Camera.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

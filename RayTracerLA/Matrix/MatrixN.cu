@@ -1,40 +1,59 @@
 #include "MatrixN.cuh"
 
+/* Cuda Matrix Related Operations */
+
+/**
+* Adds two CUDAMR objects together given their values.
+*/
+__global__ void addCUDAMR(float* mA, float* mB, int vectorSize)
+{
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	// Safety if statement.
+	if (index < vectorSize)
+	{
+		mA[index] += mB[index];
+	}
+}
+
+/**
+* Subtracts two CUDAMR objects together given their values.
+*/
+__global__ void subCUDAMR(float* mA, float* mB, int vectorSize)
+{
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	// Safety if statement.
+	if (index < vectorSize)
+	{
+		mA[index] -= mB[index];
+	}
+}
+
+/**
+* Multiplies one matrix by another matrix. Assumes square.
+*/
+__global__ void multMatrixN(float* mA, float* mB, float* result, uint matrixDim)
+{
+	float value = 0;
+	for (int x = 0; x < matrixDim; ++x)
+	{
+		value += mA[threadIdx.y * matrixDim + x] * mB[x * matrixDim + threadIdx.x];
+	}
+	result[threadIdx.y*matrixDim + threadIdx.x] = value;
+}
+
 namespace mat
 {
-	/**
-	* Multiplies one matrix by another matrix. Assumes square.
-	*/
-	__global__ void multMatrixN(float* mA, float* mB, float* result, int matrixDim)
+
+	MatrixN::MatrixN(uint dim) : CUDAMR(dim, dim)
 	{
-		float value = 0;
-		for (int x = 0; x < matrixDim; ++x)
-		{
-			value += mA[threadIdx.y * matrixDim + x] * mB[x * matrixDim + threadIdx.x];
-		}
-		result[threadIdx.y*matrixDim + threadIdx.x] = value;
-	}
-
-	
-
-	MatrixN::MatrixN(uint size) : CUDAMR(size, size)
-	{
-		if (size == 0)
-			size = 1;
-		else if (size < 0)
-			size = -size;
-
-		this->size.x = size;
-		this->size.y = size;
-		// Set location to null by def.
-		d_value = nullptr;
-		value = (float*)malloc(size*size*sizeof(float)); // Create empty array.
+		if (dim == 0)
+			dim = 1;
+		else if (dim < 0)
+			dim = -dim;
 	}
 
 	MatrixN::~MatrixN()
 	{
-		free(value);
-		deallocateGPUMemory();
 	}
 
 	void MatrixN::add(MatrixN* matrix)
@@ -61,7 +80,7 @@ namespace mat
 			return; // Add code to allocate or just silently return?
 
 		// Kelvyne++
-		subCUDAMR <<<1, size*size >>> (d_value, matrix->d_value, size.x*size.y);
+		subCUDAMR <<<1, size.x*size.y >>> (d_value, matrix->d_value, size.x*size.y);
 	}
 
 	// Check TODO
@@ -69,17 +88,14 @@ namespace mat
 	{
 		if (matrix->size != this->size)
 			return;
-		
-		size_t byteSize = sizeof(float) * this->size * this->size;
-
 		// Check if GPU memory is allocated.
 		if (this->d_value == nullptr || matrix->d_value == nullptr || result->d_value == nullptr)
 			return; // Add code to allocate or just silently return?
 
 		dim3 grid(1, 1);
-		dim3 thread(size, size);
+		dim3 thread(size.x, size.x);
 
-		multMatrixN <<<grid, thread>>> (d_value, matrix->d_value, result->d_value, this->size);
+		multMatrixN <<<grid, thread>>> (d_value, matrix->d_value, result->d_value, this->size.x);
 	}
 
 	/*Operator Overloads*/
