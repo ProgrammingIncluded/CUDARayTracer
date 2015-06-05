@@ -1,12 +1,14 @@
 #include "vectN.cuh"
 
-/*
-vectN::vectN()
-{
-}
+namespace mat{
+	VectN::VectN(uint size) : CUDAMR(size, 1)
+	{
+
+	}
 
 
-vectN::~vectN()
-{
+	VectN::~VectN()
+	{
+
+	}
 }
-*/

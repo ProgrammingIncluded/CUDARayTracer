@@ -19,28 +19,11 @@ namespace mat
 	*
 	* TODO: Add better function usage with mem allocation in specific function?
 	*/
-	class MatrixN : public CUDAMR<float>
+	class MatrixN : public CUDAMR
 	{
 		public:
 			MatrixN(uint dim);
 			~MatrixN();
-
-			/**
-			* Adds the give matrix to this matrix. Assumes values have been allocated.
-			*/
-			void add(MatrixN* matrix);
-
-			/**
-			* Subtracts this matrix with given matrix. Internally does not call
-			* negate due to negate overwrites.
-			*/
-			void sub(MatrixN* matrix);
-
-			/**
-			* Mutliplies one matrix by another.
-			*/
-			// For when you have a memory location to spare.
-			void mult(MatrixN* matrix, MatrixN* result);
 
 			/**
 			* Makes all values the opposite in the matrix.
