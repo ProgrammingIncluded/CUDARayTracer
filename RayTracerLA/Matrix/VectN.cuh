@@ -5,7 +5,10 @@
 #include "cuda_runtime.h"
 #include "vector_types.h"
 
+#include <iostream>
+
 #include "CUDAMR.cuh"
+#include "GeneralTypedef.h"
 
 namespace mat
 {
@@ -14,9 +17,10 @@ namespace mat
 	*/
 	class VectN : public CUDAMR
 	{
-		// By default, size.x holds size of vector.
-		VectN(uint size);
-		~VectN();
+		public:
+			// By default, size.x holds size of vector.
+			VectN(uint size);
+			~VectN();
 	};
 }
 #endif // VECTN_H

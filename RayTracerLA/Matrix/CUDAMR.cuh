@@ -50,6 +50,9 @@ namespace mat
 			// This represents A in Ax = b
 			void mult(CUDAMR* value, CUDAMR* result);
 
+			/* Operator Overloading */
+			friend std::ostream& operator<<(std::ostream& os, const CUDAMR& obj);
+
 		protected:
 			CUDAMR(uint x, uint y);
 

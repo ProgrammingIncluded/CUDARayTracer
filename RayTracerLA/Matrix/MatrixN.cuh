@@ -41,9 +41,6 @@ namespace mat
 			// Use RREF w/ Augumented Matrix. Thank you Prof. Van Lingen!
 			// float det();
 
-			/*Operator Overloads*/
-			friend std::ostream& operator<<(std::ostream& os, const MatrixN& matN);
-
 			//MatrixN createSubMatrix(uint size);
 	};
 }

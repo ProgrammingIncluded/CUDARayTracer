@@ -23,15 +23,17 @@ __global__ void subCUDAMR(float* mA, float* mB, uint vectorSize)
 /**
 * Multiplies one matrix by another matrix. Assumes square.
 */
-__global__ void multCUDAMR(float* mA, float* mB, float* result, uint matrixDim)
-{
-	float value = 0;
-	for (int x = 0; x < matrixDim; ++x)
-	{
-		value += mA[threadIdx.y * matrixDim + x] * mB[x * matrixDim + threadIdx.x];
-	}
-	result[threadIdx.y*matrixDim + threadIdx.x] = value;
-}
+__global__ void multCUDAMR(float* A, float* B, float* C, uint aRow, uint bRow, uint cRow) {
+	// Each thread computes one element of C
+	// by accumulating results into Cvalue
+	float Cvalue = 0;
+	int row = blockIdx.y * blockDim.y + threadIdx.y;
+	int col = blockIdx.x * blockDim.x + threadIdx.x;
+	for (int e = 0; e < aRow; ++e)
+		Cvalue += A[row * aRow + e] *
+		B[e * bRow + col];
+	C[row * cRow + col] = Cvalue;
+}
 
 __global__ void addCUDAMR(float* mA, float* mB, uint vectorSize)
 {
@@ -143,6 +145,23 @@ namespace mat
 		dim3 grid(1, 1);
 		dim3 thread(size.x, size.y);
 
-		multCUDAMR << <grid, thread >> > (d_value, value->d_value, result->d_value, size.x);
+		multCUDAMR << <grid, thread >> > (d_value, value->d_value, result->d_value, size.y, 
+			value->size.y, result->size.y);
 	}
+
+	std::ostream& operator<<(std::ostream& os, const CUDAMR& obj)
+	{
+
+		for (int x = 0; x < obj.size.x; ++x)
+		{
+			for (int i = 0; i < obj.size.y; ++i)
+			{
+				os << obj.value[x * obj.size.y + i];
+				os << " ";
+			}
+			os << std::endl;
+		}
+		return os;
+	}
+
 }

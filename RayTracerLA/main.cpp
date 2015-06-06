@@ -1,62 +1,53 @@
-#include <GL/glew.h>
-#include <windows.h>
-#include <GL/GL.h>
-#include <SFML/Window.hpp>
-#include <SFML/OpenGL.hpp>
-#include <SFML/System.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
-#include "GeneralTypedef.h"
-#include "OpenGLTest.cuh"
 
+#include <iostream>
+#include <ctime>
+#include <glm\glm.hpp>
+#include <glm\gtc\type_ptr.hpp>
+#include "Matrix/MatrixN.cuh"
+#include "Matrix/VectN.cuh"
 
 int main()
 {
-	// create the window
-	sf::RenderWindow window(sf::VideoMode(1024, 1024), "OpenGL", sf::Style::Close);
-	//window.setVerticalSyncEnabled(true);
-	sf::Vector2u windowSize;
+	float test[9] =
+	{ 1.0f, 1.0f, 1.0f,
+	1.0f, 2.0f, 1.0f,
+	1.0f, 1.0f, 1.0f };
 
-	windowSize = sf::Vector2u(window.getSize());
+	// GLM TEST
+	const clock_t tst_time = clock();
+	glm::mat3 mat = glm::make_mat3(test);
+	glm::mat3 mat2 = glm::make_mat3(test);
 
-	bool running = true;
-	window.resetGLStates();
-	glewInit();
-	std::printf("OpenGL: %s:", glGetString(GL_VERSION));
-	// We will not be using SFML's gl states.
+	glm::mat3 result = mat*mat2;
+	std::cout << float(clock() - tst_time) << std::endl;
 
-	OpenGLTest* test = new OpenGLTest(window.getSize());
+	// CUDA Matrix Test
+	mat::MatrixN* matN = new mat::MatrixN(3);
+	matN->setValue(test, 9);
+	matN->allocateGPUMemory();
 
-	sf::Clock clock;
+	mat::VectN* matB = new mat::VectN(3);
+	matB->setValue(test, 3);
+	matB->allocateGPUMemory();
 
-	while (running)
-	{
-		// handle events
-		sf::Event event;
-		while (window.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
-			{
-				// end the program
-				running = false;
-			}
-			else if (event.type == sf::Event::Resized)
-			{
-				windowSize = window.getSize();
-				test->resize(windowSize.x, windowSize.y);
-			}
-		}
+	mat::VectN* matR = new mat::VectN(3);
+	matR->setValue(test, 3);
+	matR->allocateGPUMemory();
 
-		// clear the buffers
-		window.clear();
-		test->renderScene();
-		test->createFrame(clock.getElapsedTime().asMilliseconds()/10);
-		test->drawFrame();
-		window.display();
-	}
+	std::cout << "Before:" << std::endl;
+	std::cout << *matB;
+	const clock_t begin_time = clock();
+	matN->mult(matB, matR);
+	std::cout << float(clock() - begin_time) << std::endl;
 
-	// release resources...
-	delete test;
+	matR->copyGPUValue();
+	std::cout << "After:" << std::endl;
+	std::cout << *matR;
 
-	return 0;
+	// Delete testing.
+	delete matN;
+	delete matB;
+	delete matR;
+
+	std::cin.ignore();
 }
-
