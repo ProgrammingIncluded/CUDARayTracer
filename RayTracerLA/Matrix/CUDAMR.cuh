@@ -6,11 +6,16 @@
 #include "device_launch_parameters.h"
 #include "cuda_runtime.h"
 #include "vector_types.h"
+#include "Core/CUDADef.h"
 #include "Core/GeneralTypedef.h"
 
-__global__ void addCUDAMR(float* mA, float* mB, uint vectorSize);
-__global__ void subCUDAMR(float* mA, float* mB, uint vectorSize);
-__global__ void multCUDAMR(float* mA, float* mB, float* result, uint matrixDim);
+CUDA_MFUNCTION void addCUDAMR(float* mA, float* mB, uint vectorSize);
+CUDA_MFUNCTION void subCUDAMR(float* mA, float* mB, uint vectorSize);
+CUDA_MFUNCTION void multCUDAMR(float* mA, float* mB, float* result, uint matrixDim);
+
+__global__ void kernelAddCUDAMR(float* mA, float* mB, uint vectorSize);
+__global__ void kernelSubCUDAMR(float* mA, float* mB, uint vectorSize);
+__global__ void kernelMultCUDAMR(float* mA, float* mB, float* result, uint matrixDim);
 
 namespace mat
 {

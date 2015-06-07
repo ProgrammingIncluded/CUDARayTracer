@@ -2,15 +2,12 @@
 
 /* Cuda Matrix Related Operations */
 
-/**
-* Adds two CUDAMR objects together given their values.
-*/
 
 
 /**
 * Subtracts two CUDAMR objects together given their values.
 */
-__global__ void subCUDAMR(float* mA, float* mB, uint vectorSize)
+__global__ void kernelSubCUDAMR(float* mA, float* mB, uint vectorSize)
 {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	// Safety if statement.
@@ -20,10 +17,16 @@ __global__ void subCUDAMR(float* mA, float* mB, uint vectorSize)
 	}
 }
 
+CUDA_MFUNCTION void subCUDAMR(float* mA, float* mB, uint vectorSize)
+{
+	for (uint index = 0; index < vectorSize; ++index)
+		mA[index] -= mB[index];
+}
+
 /**
 * Multiplies one matrix by another matrix. Assumes square.
 */
-__global__ void multCUDAMR(float* A, float* B, float* C, uint aRow, uint bRow, uint cRow) {
+__global__ void kernelMultCUDAMR(float* A, float* B, float* C, uint aRow, uint bRow, uint cRow) {
 	// Each thread computes one element of C
 	// by accumulating results into Cvalue
 	float Cvalue = 0;
@@ -35,8 +38,23 @@ __global__ void multCUDAMR(float* A, float* B, float* C, uint aRow, uint bRow, u
 	C[row * cRow + col] = Cvalue;
 }
 
+CUDA_MFUNCTION void multCUDAMR(float* A, float* B, float* C, uint aRow, uint bRow, uint cRow)
+{
+	float Cvalue = 0;
+	for (uint row = 0; row < aRow; ++row){
+		for (uint col = 0; row < bRow; ++row){
+			for (int e = 0; e < aRow; ++e)
+				Cvalue += A[row * aRow + e] *
+				B[e * bRow + col];
+			C[row * cRow + col] = Cvalue;
+		}
+	}
+}
 
-__global__ void addCUDAMR(float* mA, float* mB, uint vectorSize)
+/**
+* Adds two CUDAMR objects together given their values.
+*/
+__global__ void kernelAddCUDAMR(float* mA, float* mB, uint vectorSize)
 {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	// Safety if statement.
@@ -44,6 +62,12 @@ __global__ void addCUDAMR(float* mA, float* mB, uint vectorSize)
 	{
 		mA[index] += mB[index];
 	}
+}
+
+CUDA_MFUNCTION void addCUDAMR(float* mA, float* mB, uint vectorSize)
+{
+	for (uint index = 0; index < vectorSize; ++index)
+		mA[index] += mB[index];
 }
 
 namespace mat
@@ -126,7 +150,7 @@ namespace mat
 			return; // Add code to allocate or just silently return?
 
 		// Kelvyne++
-		addCUDAMR << <1, size.x*size.y >> > (d_value, value->d_value, size.x*size.y);
+		kernelAddCUDAMR << <1, size.x*size.y >> > (d_value, value->d_value, size.x*size.y);
 	}
 
 	void CUDAMR::sub(CUDAMR* value)
@@ -139,7 +163,7 @@ namespace mat
 			return; // Add code to allocate or just silently return?
 
 		// Kelvyne++
-		subCUDAMR << <1, size.x*size.y >> > (d_value, value->d_value, size.x*size.y);
+		kernelSubCUDAMR << <1, size.x*size.y >> > (d_value, value->d_value, size.x*size.y);
 	}
 
 	void CUDAMR::mult(CUDAMR* value, CUDAMR* result)
@@ -153,7 +177,7 @@ namespace mat
 		dim3 grid(1, 1);
 		dim3 thread(size.x, size.y);
 
-		multCUDAMR << <grid, thread >> > (d_value, value->d_value, result->d_value, size.y, 
+		kernelMultCUDAMR << <grid, thread >> > (d_value, value->d_value, result->d_value, size.y, 
 			value->size.y, result->size.y);
 	}
 
