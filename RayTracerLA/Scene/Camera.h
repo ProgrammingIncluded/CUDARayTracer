@@ -30,12 +30,12 @@ class Camera
 		float getTheta();
 		float getPhi();
 		float getRadius();
+		float getUp();
+		float getTanFovXDiv2();
+		float getTanFovYDiv2();
 
 		sf::Vector3f getTarget();
 		sf::Vector3f getPosition();
-
-		// Put this somewhere else? Call matrix update manually.
-		void updateCameraData(CameraData &data);
 
 	private:
 		void setUpFromPhi();

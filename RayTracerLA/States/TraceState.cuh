@@ -1,6 +1,5 @@
-#ifndef	TITLESTATE_H
-#define TITLESTATE_H
-
+#ifndef	TRACESTATE_H
+#define TRACESTATE_H
 #include <SFML/Graphics.hpp>
 #include <cuda_runtime.h>
 
@@ -9,10 +8,17 @@
 #include "Core/States/State.h"
 
 #include "Core/GeneralTypedef.h"
+#include "Core/cutil.h"
+#include "Core/cutil_inline_runtime.h"
 
-#include "States/TraceState.cuh"
+#include "Scene/Materials.h"
+#include "Scene/SceneObjects.h"
+#include "Scene/Camera.h"
 
-class TitleState : public StateFactory<TitleState, State>, public State
+#include "PathTracer.cuh"
+
+
+class TraceState : public StateFactory<TraceState, State>, public State
 {
 	public:
 		/// Function that is called whenever an input is given.
@@ -41,10 +47,31 @@ class TitleState : public StateFactory<TitleState, State>, public State
 		/// Function that should be called to instantiate the class.
 		static State* createInternal(StateManager *sm, sf::RenderWindow *rw);
 
+	private:
+		void updateCameraData(CameraData* dataPtr);
+		void setUpScene();
+
+		Camera camera;
+		float exposure;
+		float frameCount;
+		bool cameraMoved;
+		bool pauseRender;
+
+		// Pointer to GPU objects.
+		Scene::SceneObjects* d_sceneObjects;
+
+		Scene::LambertMaterial* d_materials;
+		Scene::Plane* d_planes;
+		Scene::Sphere* d_spheres;
+		Scene::Rectangle* d_rectangles;
+		Scene::Circle* d_circles;
+
+		CameraData* d_cameraData;
 	protected:
-		TitleState(StateManager* sm, sf::RenderWindow* window) : State(sm, window){};
-		TitleState(const TitleState& other) : State(other){};
-		TitleState& operator =(const State& other){return *this;};
+		TraceState(StateManager* sm, sf::RenderWindow* window) : State(sm, window){};
+		TraceState(const TraceState& other) : State(other){};
+		TraceState& operator =(const State& other){ return *this; };
 };
 
-#endif // TITLESTATE_H
+
+#endif // TRACESTATE_H

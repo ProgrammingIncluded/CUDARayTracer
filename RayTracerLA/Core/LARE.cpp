@@ -3,7 +3,7 @@
 
 LARE::LARE()
 {
-	window = new sf::RenderWindow(sf::VideoMode(1024, 1024), "OpenGL", sf::Style::Close);
+	window = new sf::RenderWindow(sf::VideoMode(256,256), "OpenGL", sf::Style::Close);
 	window->resetGLStates();
 	glewInit();
 	renderCanvas = new RCS(window->getSize());
