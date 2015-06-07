@@ -1,65 +1,44 @@
-#include "OpenGLTest.cuh"
+#include "RCS.cuh"
 
-__global__ void createGPUTexture(uchar4* result, unsigned int imageWidth, unsigned int imageHeight)
+
+RCS::RCS(sf::Vector2u windowSize)
 {
-	unsigned int tx = threadIdx.x;
-	unsigned int ty = threadIdx.y;
-	unsigned int bw = blockDim.x;
-	unsigned int bh = blockDim.y;
-	unsigned int u = (bw * blockIdx.x) + tx;
-	unsigned int v = (bh * blockIdx.y) + ty;
-	
-	unsigned int index = (v * imageWidth) + u;
+	glRenderTexture = 0;
+	glFinalTexture = 0;
+	glpbo = 0;
+	gldbo = 0;
+	glfbo = 0;
+	cudaRenderTexture = 0;
+	cudaFinalTexture = 0;
+	cudaAllocResultTexture = 0;
+	cudaAllocResultTexture_size = 0;
 
-	result[index] = make_uchar4(255.0f, 255.f, 25.0f, 255.0f);
-}
-__global__ void wow(uchar4* pos, unsigned int width, unsigned int height, float time)
-{
-	int index = blockIdx.x * blockDim.x + threadIdx.x;
-	unsigned int x = index%width;
-	unsigned int y = index / width;
+	resources = new cudaGraphicsResource_t[2];
+	resources[0] = cudaRenderTexture;
+	resources[1] = cudaFinalTexture;
 
-	if (index < width*height) {
-		unsigned char r = (x + (int)time) & 0xff;
-		unsigned char g = (y + (int)time) & 0xff;
-		unsigned char b = ((x + y) + (int)time) & 0xff;
-
-		// Each thread writes one pixel location in the texture (textel)
-		pos[index] = make_uchar4(r,g,b, 255.0f);
-	}
+	this->windowSize = sf::Vector2u(windowSize);
+	this->setupCUDA();
+	this->setupOpenGL();
+	//this->setupMatrix();
+	resize(windowSize.x, windowSize.y);
 }
 
-void OpenGLTest::renderScene()
+
+RCS::~RCS()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, glfbo);
-	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(60.0, (GLdouble)windowSize.x/ (GLdouble)windowSize.y, 0.1, 10.0);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glTranslatef(0.0f, 0.0f, -3.0f);
-
-	glViewport(0, 0, windowSize.x, windowSize.y);
-
-	glEnable(GL_LIGHTING);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-
-	glBegin(GL_TRIANGLES);
-	glColor3f(0.1, 0.2, 0.3);
-	glVertex3f(0, 0, 0);
-	glVertex3f(1, 0, 0);
-	glVertex3f(0, 1, 0);
-	glEnd();
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	deletePBO(glpbo);
+	deleteFrameBuffer(glfbo);
+	deleteDepthBuffer(gldbo);
+	deleteTexture(glRenderTexture);
+	deleteTexture(glFinalTexture);
+	deleteCUDAResource(cudaRenderTexture);
+	deleteCUDAResource(cudaFinalTexture);
+	delete resources;
 }
 
-void OpenGLTest::drawFrame()
+
+void RCS::drawFrame()
 {
 	glBindTexture(GL_TEXTURE_2D, glFinalTexture);
 	glEnable(GL_TEXTURE_2D);
@@ -91,17 +70,17 @@ void OpenGLTest::drawFrame()
 	glDisable(GL_TEXTURE_2D);
 }
 
+uchar4* RCS::getDrawCanvasPointer()
+{
+	return cudaAllocResultTexture;
+}
+
 texture<uchar4, cudaTextureType2D, cudaReadModeElementType>cudaTexRef;
 
-void OpenGLTest::createFrame(float time)
+void RCS::startCUDALockCanvas()
 {
-
-	cudaArray* cudaTexArraySource;
-	cudaArray* cudaTexArrayResult;
-
-	cudaGraphicsResource_t resources[2] = { cudaRenderTexture, cudaFinalTexture};
 	cudaGraphicsMapResources(2, resources);
-	
+
 	cutilSafeCall(cudaGraphicsSubResourceGetMappedArray(&cudaTexArraySource, cudaRenderTexture, 0, 0));
 	cutilSafeCall(cudaGraphicsSubResourceGetMappedArray(&cudaTexArrayResult, cudaFinalTexture, 0, 0));
 	cutilSafeCall(cudaBindTextureToArray(cudaTexRef, cudaTexArraySource));
@@ -123,10 +102,11 @@ void OpenGLTest::createFrame(float time)
 	size_t blocksH = (size_t)ceilf(windowSize.y / (float)BLOCK_SIZE);
 	dim3 gridDim(blocksW, blocksH, 1);
 	dim3 blockDim(BLOCK_SIZE, BLOCK_SIZE, 1);
+}
 
-	// Run code here.
-	//createGPUTexture << <gridDim, blockDim>> >(cudaAllocResultTexture, windowSize.x, windowSize.y);
-	wow << <(windowSize.x*windowSize.y)/256, 256 >> >(cudaAllocResultTexture, windowSize.x, windowSize.y, time);
+void RCS::endCUDALockCanvas()
+{
+	uint bufferSize = windowSize.x * windowSize.y * sizeof(uchar4);
 	cutilSafeCall(cudaMemcpyToArray(cudaTexArrayResult, 0, 0, cudaAllocResultTexture, bufferSize, cudaMemcpyDeviceToDevice));
 
 	// Unmap mapping to PBO so that OpenGL can access.
@@ -134,7 +114,7 @@ void OpenGLTest::createFrame(float time)
 	cutilSafeCall(cudaGraphicsUnmapResources(2, resources));
 }
 
-void OpenGLTest::setupMatrix()
+void RCS::setupMatrix()
 {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -145,16 +125,16 @@ void OpenGLTest::setupMatrix()
 	glLoadIdentity();
 
 	glPushAttrib(GL_VIEWPORT_BIT);
-	glViewport(0,0, windowSize.x, windowSize.y); 
+	glViewport(0, 0, windowSize.x, windowSize.y);
 	//glOrtho(0.0, windowSize.x, windowSize.y, 0.0, -1.0, 1.0);
 }
 
-void OpenGLTest::setupCUDA()
+void RCS::setupCUDA()
 {
 	cudaGLSetGLDevice(0);
 }
 
-void OpenGLTest::setupOpenGL()
+void RCS::setupOpenGL()
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glDisable(GL_DEPTH_TEST);
@@ -170,7 +150,7 @@ void OpenGLTest::setupOpenGL()
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void OpenGLTest::resize(int width, int height)
+void RCS::resize(int width, int height)
 {
 	windowSize.x = width;
 	windowSize.y = height;
@@ -184,7 +164,7 @@ void OpenGLTest::resize(int width, int height)
 	createCUDAResource(this->cudaFinalTexture, glFinalTexture, cudaGraphicsMapFlagsWriteDiscard);
 }
 
-void OpenGLTest::createDepthBuffer(GLuint& depthBuffer, unsigned int width, unsigned int height)
+void RCS::createDepthBuffer(GLuint& depthBuffer, unsigned int width, unsigned int height)
 {
 	// Delete the existing depth buffer if there is one.
 	deleteDepthBuffer(depthBuffer);
@@ -198,7 +178,7 @@ void OpenGLTest::createDepthBuffer(GLuint& depthBuffer, unsigned int width, unsi
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
-void OpenGLTest::deleteDepthBuffer(GLuint& depthBuffer)
+void RCS::deleteDepthBuffer(GLuint& depthBuffer)
 {
 	if (depthBuffer != 0)
 	{
@@ -207,7 +187,7 @@ void OpenGLTest::deleteDepthBuffer(GLuint& depthBuffer)
 	}
 }
 
-void OpenGLTest::createPBO(GLuint& bufferID, size_t size)
+void RCS::createPBO(GLuint& bufferID, size_t size)
 {
 	// Make sure the buffer doesn't already exist
 	deletePBO(bufferID);
@@ -219,7 +199,7 @@ void OpenGLTest::createPBO(GLuint& bufferID, size_t size)
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-void OpenGLTest::deletePBO(GLuint& bufferID)
+void RCS::deletePBO(GLuint& bufferID)
 {
 	if (bufferID != 0)
 	{
@@ -228,7 +208,7 @@ void OpenGLTest::deletePBO(GLuint& bufferID)
 	}
 }
 
-void OpenGLTest::createFrameBuffer(GLuint& framebuffer, GLuint colorAttachment0, GLuint depthAttachment)
+void RCS::createFrameBuffer(GLuint& framebuffer, GLuint colorAttachment0, GLuint depthAttachment)
 {
 	// Delete the existing framebuffer if it exists.
 	deleteFrameBuffer(framebuffer);
@@ -250,7 +230,7 @@ void OpenGLTest::createFrameBuffer(GLuint& framebuffer, GLuint colorAttachment0,
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void OpenGLTest::deleteFrameBuffer(GLuint& framebuffer)
+void RCS::deleteFrameBuffer(GLuint& framebuffer)
 {
 	if (framebuffer != 0)
 	{
@@ -260,7 +240,7 @@ void OpenGLTest::deleteFrameBuffer(GLuint& framebuffer)
 }
 
 // Create a texture resource for rendering to.
-void OpenGLTest::createTexture(GLuint& texture, unsigned int width, unsigned int height)
+void RCS::createTexture(GLuint& texture, unsigned int width, unsigned int height)
 {
 	// Make sure we don't already have a texture defined here
 	deleteTexture(texture);
@@ -281,7 +261,7 @@ void OpenGLTest::createTexture(GLuint& texture, unsigned int width, unsigned int
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void OpenGLTest::deleteTexture(GLuint& texture)
+void RCS::deleteTexture(GLuint& texture)
 {
 	if (texture != 0)
 	{
@@ -290,13 +270,13 @@ void OpenGLTest::deleteTexture(GLuint& texture)
 	}
 }
 
-void OpenGLTest::createCUDAResource(cudaGraphicsResource_t& cudaResource, GLuint GLtexture, cudaGraphicsMapFlags mapFlags)
+void RCS::createCUDAResource(cudaGraphicsResource_t& cudaResource, GLuint GLtexture, cudaGraphicsMapFlags mapFlags)
 {
 	// Map the GL texture resource with the CUDA resource
 	cudaGraphicsGLRegisterImage(&cudaResource, GLtexture, GL_TEXTURE_2D, mapFlags);
 }
 
-void OpenGLTest::deleteCUDAResource(cudaGraphicsResource_t& cudaResource)
+void RCS::deleteCUDAResource(cudaGraphicsResource_t& cudaResource)
 {
 	if (cudaResource != 0)
 	{

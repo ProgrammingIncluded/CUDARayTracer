@@ -1,5 +1,5 @@
-#ifndef	OPENGLTEST_CUH
-#define OPENGLTEST_CUH
+#ifndef	RCS_CUH
+#define RCS_CUH
 
 #include <GL/glew.h>
 #include <windows.h>
@@ -8,6 +8,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
+
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -17,15 +18,35 @@
 #include "cutil_inline_runtime.h"
 #include "GeneralTypedef.h"
 
-class OpenGLTest
+class RCS
 {
 	public:
+		RCS(sf::Vector2u windowSize);
+		~RCS();
+
+		void resize(int width, int height);
+
+		void drawFrame();
+		void renderScene();
+
+		uchar4* getDrawCanvasPointer();
+
+		// Call these functions to allow cuda calls on canvas.
+		void startCUDALockCanvas();
+		void endCUDALockCanvas();
+
+	private:
+		// Canvas pointer values.
+		cudaArray* cudaTexArraySource;
+		cudaArray* cudaTexArrayResult;
+
 		GLuint glRenderTexture;
 		GLuint glFinalTexture;
 		GLuint glpbo;
 		GLuint gldbo;
 		GLuint glfbo;
 		// Cuda
+		cudaGraphicsResource_t* resources;
 		cudaGraphicsResource_t cudaRenderTexture;
 		cudaGraphicsResource_t cudaFinalTexture;
 
@@ -33,44 +54,7 @@ class OpenGLTest
 		size_t cudaAllocResultTexture_size;
 
 		sf::Vector2u windowSize;
-	
-		OpenGLTest(sf::Vector2u windowSize)
-		{
-			glRenderTexture = 0;
-			glFinalTexture = 0;
-			glpbo = 0;
-			gldbo = 0;
-			glfbo = 0;
-			cudaRenderTexture = 0;
-			cudaFinalTexture = 0;
-			cudaAllocResultTexture = 0;
-			cudaAllocResultTexture_size = 0;
 
-			this->windowSize = sf::Vector2u(windowSize);
-			this->setupCUDA();
-			this->setupOpenGL();
-			//this->setupMatrix();
-			resize(windowSize.x, windowSize.y);
-		};
-
-		~OpenGLTest()
-		{
-			deletePBO(glpbo);
-			deleteFrameBuffer(glfbo);
-			deleteDepthBuffer(gldbo);
-			deleteTexture(glRenderTexture);
-			deleteTexture(glFinalTexture);
-			deleteCUDAResource(cudaRenderTexture);
-			deleteCUDAResource(cudaFinalTexture);
-		}
-
-		void resize(int width, int height);
-
-		void drawFrame();
-		void createFrame(float time);
-		void renderScene();
-	private:
-		//OpenGL Functions.
 		void createTexture(GLuint &texture, unsigned int width, unsigned int height);
 		void deleteTexture(GLuint &texture);
 
@@ -90,4 +74,5 @@ class OpenGLTest
 		void setupCUDA();
 		void setupMatrix();
 };
-#endif //OPENGLTEST_CUH
+
+#endif // RCS_CUH
