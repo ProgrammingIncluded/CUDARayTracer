@@ -29,6 +29,11 @@ namespace mat
 			*/
 			void copyGPUValue();
 
+			/*
+			* Copies CPU value to GPU. Allocation of GPU is required.
+			*/
+			void copyValueToGPU();
+
 			/**
 			* Call this function when you want to allocate memory into the GPU.
 			* Mainly used internally. Returns false if space already allocated.
@@ -70,7 +75,6 @@ namespace mat
 
 			// Represents the number of elements inside the array.
 			sf::Vector2u size;
-	
 	};
 
 }

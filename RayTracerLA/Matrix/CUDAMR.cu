@@ -33,7 +33,8 @@ __global__ void multCUDAMR(float* A, float* B, float* C, uint aRow, uint bRow, u
 		Cvalue += A[row * aRow + e] *
 		B[e * bRow + col];
 	C[row * cRow + col] = Cvalue;
-}
+}
+
 
 __global__ void addCUDAMR(float* mA, float* mB, uint vectorSize)
 {
@@ -81,9 +82,19 @@ namespace mat
 
 	void CUDAMR::copyGPUValue()
 	{
-		cudaDeviceSynchronize();
+		if (this->d_value == nullptr)
+			return;
+		//cudaDeviceSynchronize();
 		// You have to copy the result or use friends.
 		cudaMemcpy(this->value, this->d_value, byteSize, cudaMemcpyDeviceToHost);
+	}
+
+	void CUDAMR::copyValueToGPU()
+	{
+		if (this->d_value == nullptr)
+		return;
+
+		cudaMemcpy(this->d_value, this->value, byteSize, cudaMemcpyHostToDevice);
 	}
 
 	bool CUDAMR::allocateGPUMemory()
@@ -93,9 +104,6 @@ namespace mat
 
 		// Allocate!
 		cudaMalloc(&d_value, byteSize);
-		// Give it the info. Careful of interdeterminant values.
-		cudaMemcpy(d_value, value, byteSize, cudaMemcpyHostToDevice);
-
 		return true;
 	}
 

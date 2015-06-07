@@ -79,6 +79,26 @@ void Camera::setUpFromPhi()
 	}
 }
 
+float Camera::getTheta()
+{
+	return theta;
+}
+
+float Camera::getPhi()
+{
+	return phi;
+}
+
+float Camera::getRadius()
+{
+	return radius;
+}
+
+sf::Vector3f Camera::getTarget()
+{
+	return target;
+}
+
 sf::Vector3f Camera::getPosition()
 {
 	float x = radius * sinf(phi) * sinf(theta);
@@ -88,3 +108,28 @@ sf::Vector3f Camera::getPosition()
 	return sf::Vector3f(x,y,z) + target;
 }
 
+void Camera::updateCameraData(CameraData &data)
+{
+	float3 worldUp = make_float3(0.0f, up, 0.0f);
+	float3 origin = make_float3(getPosition());
+
+	float3 zAxis = normalize(make_float3(target) - origin);
+	float3 xAxis = normalize(cross(worldUp, zAxis));
+	float3 yAxis = cross(zAxis, xAxis);
+
+	float value[9] = 
+	{
+		xAxis.x, yAxis.x, zAxis.x,
+		xAxis.y, yAxis.y, zAxis.y,
+		xAxis.z, yAxis.z, zAxis.z
+	};
+
+	data.vpMatrix.setValue(value, 9);
+	value[0] = origin.x;
+	value[1] = origin.y;
+	value[2] = origin.z;
+	data.origin.setValue(value, 3);
+
+	data.tanFovXDiv2 = this->tanFovXDiv2;
+	data.tanFovYDiv2 = this->tanFovYDiv2;
+}

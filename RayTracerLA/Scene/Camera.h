@@ -5,8 +5,9 @@
 #include <math.h>  
 
 #include "Core/helper_math.h"
+#include "Core/SCMath.h"
 #include "CameraData.h"
-
+// TODO, use Eigen matrix library.
 class Camera
 {
 	public:
@@ -28,10 +29,13 @@ class Camera
 
 		float getTheta();
 		float getPhi();
+		float getRadius();
 
+		sf::Vector3f getTarget();
 		sf::Vector3f getPosition();
 
-	protected:
+		// Put this somewhere else? Call matrix update manually.
+		void updateCameraData(CameraData &data);
 
 	private:
 		void setUpFromPhi();
