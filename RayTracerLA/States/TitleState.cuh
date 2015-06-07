@@ -8,7 +8,7 @@
 #include "Core/States/StateManager.h"
 #include "Core/States/State.h"
 
-#include "GeneralTypedef.h"
+#include "Core/GeneralTypedef.h"
 
 
 class TitleState : public StateFactory<TitleState, State>, public State

@@ -6,7 +6,7 @@
 #include "device_launch_parameters.h"
 #include "cuda_runtime.h"
 #include "vector_types.h"
-#include "GeneralTypedef.h"
+#include "Core/GeneralTypedef.h"
 
 __global__ void addCUDAMR(float* mA, float* mB, uint vectorSize);
 __global__ void subCUDAMR(float* mA, float* mB, uint vectorSize);

@@ -8,7 +8,7 @@
 #include <iostream>
 
 #include "CUDAMR.cuh"
-#include "GeneralTypedef.h"
+#include "Core/GeneralTypedef.h"
 
 namespace mat
 {
