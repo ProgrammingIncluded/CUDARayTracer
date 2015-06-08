@@ -22,6 +22,6 @@ __device__ float3 createCosineWeightedDirectionInHemisphere(float3 normal, curan
 
 uint32 WangHash(uint32 a);
 
-cudaError pathTraceNextFrame(uchar4* buffer, uint width, uint height, CameraData *camera, Scene::SceneObjects *sceneObjects, uint frameNumber);
+cudaError pathTraceNextFrame(uchar4* buffer, uint width, uint height, CameraData *camera, Scene::SceneObjects *sceneObjects, bool weightSample, uint frameNumber);
 
 #endif // PATHTRACER_CUH

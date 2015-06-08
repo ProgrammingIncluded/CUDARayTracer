@@ -35,10 +35,15 @@ class StateManager
 		/// Returns amount of states in manager.
 		int stateCount();
 
+		void exit();
+
+		bool isRunning();
+
 		/// Call to collect and delete the states. Alternative to heavy smart pointers.
 		void garbageCollect();
 
 	private:
+		bool running;
 		std::stack < State* > states;
 		// Smart pointer alternative by garbage collecting.
 		// Deleted each update cycle. 

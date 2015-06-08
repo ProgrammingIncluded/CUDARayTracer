@@ -7,7 +7,7 @@
 #define PI_DIV_TWO 1.57079632679f
 #define INV_SQRT_THREE 0.5773502691896257645091487805019574556476f 
 
-__global__ void pathTraceKernel(uchar4* textureData, uint width, uint height, CameraData *g_camera, Scene::SceneObjects *g_sceneObjects, uint hashedFrameNumber) {
+__global__ void pathTraceKernel(uchar4* textureData, uint width, uint height, CameraData *g_camera, Scene::SceneObjects *g_sceneObjects, bool weightSample,uint hashedFrameNumber) {
 	// Create a local copy of the arguments
 	CameraData camera = *g_camera;
 	Scene::SceneObjects sceneObjects = *g_sceneObjects;
@@ -70,23 +70,24 @@ __global__ void pathTraceKernel(uchar4* textureData, uint width, uint height, Ca
 
 			// Choose the direction based on the material
 			if (material.MaterialType == Scene::DIFFUSE) {
-#ifdef IMPORTANCE_SAMPLE
-				ray.Direction = createCosineWeightedDirectionInHemisphere(normal, &randState);
+				if (weightSample == true){
+					ray.Direction = createCosineWeightedDirectionInHemisphere(normal, &randState);
 
-				// Accumulate the diffuse/specular color
-				accumulatedMaterialColor *= material.MainColor; // * dot(ray.Direction, normal) / PI     // Cancels with pdf
+					// Accumulate the diffuse/specular color
+					accumulatedMaterialColor *= material.MainColor; // * dot(ray.Direction, normal) / PI     // Cancels with pdf
+				}
+				else{
+					// Divide by the pdf
+					//accumulatedMaterialColor /= dot(ray.Direction, normal) / PI
 
-				// Divide by the pdf
-				//accumulatedMaterialColor /= dot(ray.Direction, normal) / PI
-#else
-				ray.Direction = createUniformDirectionInHemisphere(normal, &randState);
+					ray.Direction = createUniformDirectionInHemisphere(normal, &randState);
 
-				// Accumulate the diffuse/specular color
-				accumulatedMaterialColor *= material.MainColor /* * (1 / PI)  <- this cancels with the PI in the pdf */ * dot(ray.Direction, normal);
+					// Accumulate the diffuse/specular color
+					accumulatedMaterialColor *= material.MainColor /* * (1 / PI)  <- this cancels with the PI in the pdf */ * dot(ray.Direction, normal);
 
-				// Divide by the pdf
-				accumulatedMaterialColor *= 2.0f; // pdf == 1 / (2 * PI)
-#endif
+					// Divide by the pdf
+					accumulatedMaterialColor *= 2.0f; // pdf == 1 / (2 * PI)
+				}
 			}
 			else if (material.MaterialType == Scene::SPECULAR) {
 				ray.Direction = reflect(ray.Direction, normal);
@@ -249,12 +250,12 @@ uint32 WangHash(uint32 a) {
 * in a function. We forward declare the function in other parts of the project and
 * implement the functions here, in this .cu file.
 */
-cudaError pathTraceNextFrame(uchar4* buffer, uint width, uint height, CameraData *camera, Scene::SceneObjects *sceneObjects, uint frameNumber) {
+cudaError pathTraceNextFrame(uchar4* buffer, uint width, uint height, CameraData *camera, Scene::SceneObjects *sceneObjects,bool weightSample, uint frameNumber) {
 	dim3 Db = dim3(16, 16);   // block dimensions are fixed to be 256 threads
 	dim3 Dg = dim3((width + Db.x - 1) / Db.x, (height + Db.y - 1) / Db.y);
 
 	// The actual kernel launch call
-	pathTraceKernel <<<Dg, Db >>>(buffer, width, height, camera, sceneObjects, WangHash(frameNumber));
+	pathTraceKernel <<<Dg, Db >>>(buffer, width, height, camera, sceneObjects, weightSample,WangHash(frameNumber));
 
 	return cudaGetLastError();
 }

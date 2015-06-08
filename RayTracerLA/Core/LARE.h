@@ -14,6 +14,8 @@ class LARE : public StateManager
 {
 	public:
 		LARE();
+		// Screen Size Constructor
+		LARE(int size);
 		~LARE();
 
 		/**

@@ -7,8 +7,15 @@ void TitleState::input(sf::Event &event)
 
 void TitleState::update()
 {
-	stateManager->popState();
-	stateManager->pushState(TraceState::create(stateManager, window));
+	if (switcher == false)
+	{
+		stateManager->pushState(CornellState::create(stateManager, window));
+	}
+	else
+	{
+		stateManager->pushState(BallState::create(stateManager,window));
+	}
+	switcher = !switcher;
 }
 
 void TitleState::draw(uchar4* canvas, float time)
@@ -28,7 +35,7 @@ void TitleState::resume()
 
 void TitleState::setUp()
 {
-
+	switcher = false;
 }
 
 void TitleState::end()

@@ -18,7 +18,7 @@
 #include "PathTracer.cuh"
 
 
-class TraceState : public StateFactory<TraceState, State>, public State
+class TraceState : public State
 {
 	public:
 		/// Function that is called whenever an input is given.
@@ -42,21 +42,21 @@ class TraceState : public StateFactory<TraceState, State>, public State
 		void setUp();
 
 		/// Function called when state is exiting, i.e. popped.
-		void end();
+		virtual void end() = 0;
 
-		/// Function that should be called to instantiate the class.
-		static State* createInternal(StateManager *sm, sf::RenderWindow *rw);
+	protected:
+		virtual void setUpScene() = 0;
 
-	private:
 		void updateCameraData(CameraData* dataPtr);
-		void setUpScene();
 
 		Camera camera;
-		float exposure;
 		float frameCount;
 		bool cameraMoved;
 		bool pauseRender;
 
+		bool isWeighted;
+
+		// Mouse movement.
 		bool mouseBuffer;
 		sf::Vector2i prevMousePos;
 
@@ -70,7 +70,6 @@ class TraceState : public StateFactory<TraceState, State>, public State
 		Scene::Circle* d_circles;
 
 		CameraData* d_cameraData;
-	protected:
 		TraceState(StateManager* sm, sf::RenderWindow* window) : State(sm, window){};
 		TraceState(const TraceState& other) : State(other){};
 		TraceState& operator =(const State& other){ return *this; };

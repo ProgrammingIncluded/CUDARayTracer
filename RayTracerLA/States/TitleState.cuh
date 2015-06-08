@@ -10,7 +10,8 @@
 
 #include "Core/GeneralTypedef.h"
 
-#include "States/TraceState.cuh"
+#include "States/CornellState.cuh"
+#include "States/BallState.cuh"
 
 class TitleState : public StateFactory<TitleState, State>, public State
 {
@@ -42,6 +43,8 @@ class TitleState : public StateFactory<TitleState, State>, public State
 		static State* createInternal(StateManager *sm, sf::RenderWindow *rw);
 
 	protected:
+		bool switcher;
+
 		TitleState(StateManager* sm, sf::RenderWindow* window) : State(sm, window){};
 		TitleState(const TitleState& other) : State(other){};
 		TitleState& operator =(const State& other){return *this;};

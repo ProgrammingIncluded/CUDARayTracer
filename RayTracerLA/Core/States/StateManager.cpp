@@ -2,7 +2,17 @@
 
 StateManager::StateManager()
 {
+	running = true;
+}
 
+void StateManager::exit()
+{
+	running = false;
+}
+
+bool StateManager::isRunning()
+{
+	return running;
 }
 
 void StateManager::update()

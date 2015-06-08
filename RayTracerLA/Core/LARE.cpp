@@ -9,6 +9,16 @@ LARE::LARE()
 	renderCanvas = new RCS(window->getSize());
 }
 
+LARE::LARE(int size)
+{
+	if (size < 0)
+		size = 256;
+	window = new sf::RenderWindow(sf::VideoMode(size, size), "OpenGL", sf::Style::Close);
+	window->resetGLStates();
+	glewInit();
+	renderCanvas = new RCS(window->getSize());
+}
+
 
 LARE::~LARE()
 {
@@ -18,7 +28,7 @@ LARE::~LARE()
 void LARE::run()
 {
 	sf::Clock time;
-	while (isEmpty() != true)
+	while (isEmpty() != true && isRunning() == true)
 	{
 		sf::Event event;
 		while (window->pollEvent(event))
