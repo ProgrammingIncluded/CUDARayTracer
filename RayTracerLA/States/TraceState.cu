@@ -45,7 +45,10 @@ void TraceState::input(sf::Event &event)
 		else if (event.key.code == sf::Keyboard::N)
 			stateManager->popState();
 		else if (event.key.code == sf::Keyboard::P)
+		{
+			cameraMoved = false;
 			pauseRender = !pauseRender;
+		}
 		else if (event.key.code == sf::Keyboard::W)
 			camera.zoom(1.0f);
 		else if (event.key.code == sf::Keyboard::A)
