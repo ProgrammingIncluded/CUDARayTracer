@@ -1,6 +1,6 @@
 #include "PathTracer.cuh"
 
-//#define IMPORTANCE_SAMPLE
+#define IMPORTANCE_SAMPLE
 
 #define PI 3.14159265359f
 #define TWO_PI 6.283185307f
@@ -32,6 +32,20 @@ __global__ void pathTraceKernel(uchar4* textureData, uint width, uint height, Ca
 
 	// Bounce the ray around the scene
 	for (uint bounces = 0; bounces < 10; ++bounces) {
+		if (accumulatedMaterialColor.x > 255.0f)
+			accumulatedMaterialColor.x = 255.0f;
+		if (accumulatedMaterialColor.y > 255.0f)
+			accumulatedMaterialColor.y = 255.0f;
+		if (accumulatedMaterialColor.z > 255.0f)
+			accumulatedMaterialColor.z = 255.0f;
+
+		if (pixelColor.x > 255.0f)
+			pixelColor.x = 255.0f;
+		if (pixelColor.y > 255.0f)
+			pixelColor.y = 255.0f;
+		if (pixelColor.z > 255.0f)
+			pixelColor.z = 255.0f;
+
 		// Initialize the intersection variables
 		float closestIntersection = FLT_MAX;
 		float3 normal;
@@ -94,7 +108,6 @@ __global__ void pathTraceKernel(uchar4* textureData, uint width, uint height, Ca
 		else {
 			// We didn't hit anything, return the sky color
 			pixelColor += accumulatedMaterialColor * make_float3(0.846f, 0.933f, 0.949f);
-
 			break;
 		}
 	}
@@ -104,10 +117,22 @@ __global__ void pathTraceKernel(uchar4* textureData, uint width, uint height, Ca
 		// Get a pointer to the pixel at (x,y)
 		uint index = x + y * width;
 
-		// Write pixel data
-		textureData[index].x += pixelColor.x;
-		textureData[index].y += pixelColor.y;
-		textureData[index].z += pixelColor.z;
+
+		if (textureData[index].x  + pixelColor.x> 255.0f)
+			textureData[index].x = 255.0f;
+		else
+			textureData[index].x += pixelColor.x;
+
+		if (textureData[index].y + pixelColor.y> 255.0f)
+			textureData[index].y = 255.0f;
+		else
+			textureData[index].y += pixelColor.y;
+		
+		if (textureData[index].z + pixelColor.z> 255.0f)
+			textureData[index].z = 255.0f;
+		else
+			textureData[index].z += pixelColor.z;
+		
 		textureData[index].w = 255.0f;
 	}
 }

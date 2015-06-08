@@ -13,7 +13,7 @@
 #include "Core/helper_math.h"
 #include <vector_types.h>
 
-#define  BACKFACE_CULL_SPHERES
+//#define  BACKFACE_CULL_SPHERES
 
 /**
 * Test for the intersection of a ray with a sphere
@@ -65,7 +65,7 @@ inline __device__ float testRaySphereIntersection(Scene::Ray &ray, Scene::Sphere
 		return -1.0f;
 #else
 		// Return the far side of the sphere
-		nearestIntersection = max(firstIntersection, secondIntersection);
+		nearestIntersection = max(t_0, t_1);
 
 		// We reverse the direction of the normal, since we are inside the sphere
 		normalDirection = -1.0f;

@@ -27,9 +27,9 @@ void Camera::setCamera(float theta, float phi, float radius, sf::Vector3f target
 	setTarget(target);
 }
 
-bool Camera::setPhi(float theta)
+bool Camera::setPhi(float phi)
 {
-	this->theta += std::fmod(theta, TWO_PI) * TWO_PI;
+	this->phi = phi;
 	setUpFromPhi();
 	return true;
 }
@@ -62,6 +62,29 @@ void Camera::rotate(float deltaTheta, float deltaPhi)
 	setUpFromPhi();
 }
 
+void Camera::pan(float deltaX, float deltaY)
+{
+	float3 look = normalize(make_float3(target - getPosition()));
+	float3 worldUp = make_float3(0.0f, up, 0.0f);
+
+	float3 right = normalize(cross(worldUp, look));
+	float3 up = cross(look, right);
+
+	target += make_vector3f((right * deltaX) + (up * deltaY));
+}
+
+void Camera::zoom(float distance) {
+	radius -= distance;
+
+	// Don't let the radius go negative
+	// If it does, re-project our target down the look vector
+	if (radius <= 0.0f) {
+		radius = 30.0f;
+		float3 look = normalize(make_float3(target - getPosition()));
+		target += make_vector3f(look * 30.0f);
+	}
+}
+
 bool Camera::setProjection(float fov, float aspectRatio)
 {
 	tanFovXDiv2 = tan(fov * 0.5f);
@@ -72,10 +95,10 @@ bool Camera::setProjection(float fov, float aspectRatio)
 void Camera::setUpFromPhi()
 {
 	if ((phi > 0 && phi < PI) || (phi < -PI && phi > -TWO_PI)) {
-		up = 1.0f;
+		up = -1.0f;
 	}
 	else {
-		up = -1.0f;
+		up = 1.0f;
 	}
 }
 

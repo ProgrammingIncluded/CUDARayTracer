@@ -57,6 +57,9 @@ class TraceState : public StateFactory<TraceState, State>, public State
 		bool cameraMoved;
 		bool pauseRender;
 
+		bool mouseBuffer;
+		sf::Vector2i prevMousePos;
+
 		// Pointer to GPU objects.
 		Scene::SceneObjects* d_sceneObjects;
 

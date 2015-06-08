@@ -19,6 +19,8 @@ class Camera
 		void setCamera(float theta, float phi, float radius, sf::Vector3f target = sf::Vector3f(0,0,0));
 
 		void rotate(float deltaTheta, float deltaPhi);
+		void pan(float deltaX, float deltaY);
+		void zoom(float distance);
 
 		bool setTheta(float theta);
 		bool setPhi(float phi);

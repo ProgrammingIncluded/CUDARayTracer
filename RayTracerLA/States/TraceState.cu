@@ -21,6 +21,15 @@ __global__ void titleDraw(uchar4* pos, unsigned int width, unsigned int height, 
 	}
 }
 
+__global__ void clearTexture(uchar4* pos)
+{
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	pos[index].x = 0;
+	pos[index].y = 0;
+	pos[index].z = 0;
+	pos[index].w = 255.0f;
+}
+
 void TraceState::input(sf::Event &event)
 {
 	if (event.type == sf::Event::Closed)
@@ -29,10 +38,43 @@ void TraceState::input(sf::Event &event)
 	}
 	else if (event.type == sf::Event::KeyPressed)
 	{
+		cameraMoved = true;
 		if (event.key.code == sf::Keyboard::Escape)
 			stateManager->popState();
 		else if (event.key.code == sf::Keyboard::P)
 			pauseRender = !pauseRender;
+		else if (event.key.code == sf::Keyboard::W)
+			camera.zoom(1.0f);
+		else if (event.key.code == sf::Keyboard::A)
+			camera.pan(-1.0f, 0.0f);
+		else if (event.key.code == sf::Keyboard::D)
+			camera.pan(1.0f, 0);
+		else if (event.key.code == sf::Keyboard::S)
+			camera.zoom(-1.0f);
+		else if (event.key.code == sf::Keyboard::Up)
+			camera.rotate(0.0f, 3.14f / 100);
+		else if (event.key.code == sf::Keyboard::Down)
+			camera.rotate(0.0f, -3.14f / 100);
+		else if (event.key.code == sf::Keyboard::Left)
+			camera.rotate(-1.07f / 100, 0);
+		else if (event.key.code == sf::Keyboard::Right)
+			camera.rotate(1.07f / 100, 0);
+
+	}
+	else if (event.type == sf::Event::MouseButtonPressed && mouseBuffer == false)
+	{
+		mouseBuffer = true;
+		prevMousePos = sf::Mouse::getPosition();
+	}
+	else if (event.type == sf::Event::MouseButtonReleased && mouseBuffer == true)
+	{
+		sf::Vector2i mousePos = sf::Mouse::getPosition();
+		mouseBuffer = false;
+		float dPhi = ((float)(prevMousePos.x - mousePos.x) / 300);
+		float dTheta = ((float)(prevMousePos.y - mousePos.y) / 300);
+
+		camera.rotate(-dTheta, dPhi);
+		cameraMoved = true;
 	}
 }
 
@@ -43,11 +85,18 @@ void TraceState::update()
 
 void TraceState::draw(uchar4* canvas, float time)
 {
+
 	if (pauseRender == true)
 		return;
 	sf::Vector2u windowSize = window->getSize();
-	uint totalPixels = windowSize.x * windowSize.y;
-	pathTraceNextFrame(canvas, windowSize.x, windowSize.y, d_cameraData, d_sceneObjects, time);
+	if (cameraMoved == true)
+	{
+		cudaDeviceSynchronize();
+		updateCameraData(d_cameraData);
+		clearTexture << <(windowSize.x*windowSize.y) / 256, 256 >> >(canvas);
+		cameraMoved = false;
+	}
+	pathTraceNextFrame(canvas, windowSize.x, windowSize.y, d_cameraData, d_sceneObjects, ++frameCount);
 }
 
 void TraceState::pause()
@@ -64,6 +113,8 @@ void TraceState::setUp()
 {
 	cameraMoved = false;
 	pauseRender = false;
+	mouseBuffer = false;
+	prevMousePos = sf::Vector2i(0,0);
 	frameCount = 0;
 
 	setUpScene();
@@ -78,8 +129,8 @@ void TraceState::end()
 	cutilSafeCall(cudaFree(d_materials));
 	//cutilSafeCall(cudaFree(d_planes));
 	cutilSafeCall(cudaFree(d_spheres));
-	//cutilSafeCall(cudaFree(d_rectangles));
-	//cutilSafeCall(cudaFree(d_circles));
+	cutilSafeCall(cudaFree(d_rectangles));
+	cutilSafeCall(cudaFree(d_circles));
 	cutilSafeCall(cudaFree(d_sceneObjects));
 	cutilSafeCall(cudaFree(d_cameraData));
 }
@@ -118,7 +169,7 @@ void TraceState::updateCameraData(CameraData* dataPtr)
 	data.tanFovYDiv2 = camera.getTanFovYDiv2();
 	cutilSafeCall(cudaMemcpy(dataPtr, &data, sizeof(CameraData), cudaMemcpyHostToDevice));
 }
-/*
+
 void TraceState::setUpScene()
 {
 #define NUM_MATERIALS 5
@@ -191,7 +242,7 @@ void TraceState::setUpScene()
 	// Set the exposure
 	exposure = 1.0f;
 }
-*/
+/*
 void TraceState::setUpScene()
 {
 	#define NUM_MATERIALS 6
@@ -260,3 +311,4 @@ void TraceState::setUpScene()
 	// Set the exposure
 	exposure = 1.0f;
 }
+*/
